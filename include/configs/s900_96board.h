@@ -18,7 +18,7 @@
 						"name=SWAP,size=768MiB;name=BOOT_MSG,size=-;\"; "		\
 						"gpt write mmc 1 ${partitions};\0"
 
-#define CONFIG_BOOTCOMMAND		"run emmcboot;"
+#define CONFIG_BOOTCOMMAND		"run allboot;"
 #define CONFIG_BOOTDELAY		1	/* autoboot after 1 seconds */
 
 #define CONFIG_PWM_OWL

@@ -47,7 +47,6 @@
 	"loadramdisk=fatload ${devtype} ${devpart} ${ramdisk_addr_r} ramdisk.img\0" \
 	"loadfdt=fatload ${devtype} ${devpart} ${fdt_addr_r} kernel.dtb\0" \
 	"loadbootscr=fatload ${devtype} ${devpart} ${scriptaddr} ${bootscr} \0" \
-	"loadbootscr_linaro=fatload ${devtype} ${bootdisk}:2 ${scriptaddr} ${bootscr} \0" \
 	"loadbootenv=fatload ${devtype} ${devpart} ${scriptaddr} ${bootenv} \0" \
 	"mmcargs=setenv devtype mmc; setenv devpart ${bootdisk}:${bootpart}\0" \
 	"emmcargs=setenv devtype mmc; setenv devpart ${bootdisk}:${bootpart}\0"	\
@@ -60,18 +59,31 @@
 			"env import -t ${scriptaddr} ${filesize};" \
 		"fi;" \
 		"if test -n \\\"${uenvcmd}\\\"; then " \
-			"echo Running uenvcmd ...;" \
+			"echo Running uenvcmd, boot from mmc ${devpart} ...;" \
 			"run uenvcmd;" \
+			"run mboot;" \
 		"fi;" \
 		"if run loadbootscr; then " \
-			"echo Jumping to ${bootscr};" \
+			"echo Jumping to ${bootscr}, boot from mmc ${devpart} ;" \
 			"source ${scriptaddr};" \
-		"fi;" \
-		"if run loadbootscr_linaro; then " \
-			"echo Jumping to ${bootscr};" \
-			"source ${scriptaddr};" \
-		"fi;" \
-		"run mboot;\0" \
+			"run mboot;" \
+		"fi;\0" \
+	"runbootscr=" \
+		"if mmc dev ${bootdisk} ; then " \
+			"run mmcargs;" \
+			"if test -n ${dotry}; then " \
+				"if fatload ${devtype} ${devpart} 0x1000000 /boot.txt; then " \
+					"run setbootenv; " \
+				"fi; " \
+			"else " \
+					"run setbootenv; " \
+			"fi; " \
+		"fi;\0" \
+	"allboot=" \
+		"setenv bootdisk 0; setenv bootpart 1; setenv dotry 1; run runbootscr;" \
+		"setenv bootdisk 0; setenv bootpart 2; setenv dotry 1; run runbootscr;" \
+		"setenv bootdisk 1; setenv bootpart 1; setenv dotry  ; run runbootscr;" \
+		"setenv bootdisk 1; setenv bootpart 2; setenv dotry  ; run runbootscr; \0" \
 	"mmcboot=echo boot from mmc card ...; "		\
 		"run mmcargs; run setbootenv\0"				\
 	"emmcboot=echo boot from emmc card ...; "		\
