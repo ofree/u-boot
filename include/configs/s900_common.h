@@ -28,6 +28,10 @@
 /* Generic Timer Definitions */
 #define COUNTER_FREQUENCY		(24000000)	/* 24MHz */
 
+/* Do not preserve environment */
+#define CONFIG_ENV_IS_NOWHERE		1
+#define CONFIG_ENV_SIZE			0x1000
+
 /* Size of malloc() pool */
 #define CONFIG_SYS_MALLOC_LEN		(32 * 1024 * 1024 + CONFIG_ENV_SIZE)
 
@@ -48,9 +52,7 @@
 	"loadfdt=fatload ${devtype} ${devpart} ${fdt_addr_r} kernel.dtb\0" \
 	"loadbootscr=fatload ${devtype} ${devpart} ${scriptaddr} ${bootscr} \0" \
 	"loadbootenv=fatload ${devtype} ${devpart} ${scriptaddr} ${bootenv} \0" \
-	"mmcargs=setenv devtype mmc; setenv devpart ${bootdisk}:${bootpart}\0" \
 	"emmcargs=setenv devtype mmc; setenv devpart ${bootdisk}:${bootpart}\0"	\
-	"nandargs=setenv devtype nand; setenv devpart ${bootdisk}:${bootpart}\0" \
 	"mboot=run loadkernel; run loadramdisk; run loadfdt;" \
 		"booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}\0"	\
 	"setbootenv=" \
@@ -59,18 +61,18 @@
 			"env import -t ${scriptaddr} ${filesize};" \
 		"fi;" \
 		"if test -n \\\"${uenvcmd}\\\"; then " \
-			"echo Running uenvcmd, boot from mmc ${devpart} ...;" \
+			"echo Running uenvcmd, boot mmc ${devpart} ...;" \
 			"run uenvcmd;" \
 			"run mboot;" \
 		"fi;" \
 		"if run loadbootscr; then " \
-			"echo Jumping to ${bootscr}, boot from mmc ${devpart} ;" \
+			"echo Jumping to ${bootscr}, boot mmc ${devpart} ;" \
 			"source ${scriptaddr};" \
 			"run mboot;" \
 		"fi;\0" \
 	"runbootscr=" \
 		"if mmc dev ${bootdisk} ; then " \
-			"run mmcargs;" \
+			"run emmcargs;" \
 			"if test -n ${dotry}; then " \
 				"if fatload ${devtype} ${devpart} 0x1000000 /boot.txt; then " \
 					"run setbootenv; " \
@@ -83,13 +85,9 @@
 		"setenv bootdisk 0; setenv bootpart 1; setenv dotry 1; run runbootscr;" \
 		"setenv bootdisk 0; setenv bootpart 2; setenv dotry 1; run runbootscr;" \
 		"setenv bootdisk 1; setenv bootpart 1; setenv dotry  ; run runbootscr;" \
-		"setenv bootdisk 1; setenv bootpart 2; setenv dotry  ; run runbootscr; \0" \
-	"mmcboot=echo boot from mmc card ...; "		\
-		"run mmcargs; run setbootenv\0"				\
+		"setenv bootdisk 1; setenv bootpart 2; setenv dotry  ; run runbootscr;\0" \
 	"emmcboot=echo boot from emmc card ...; "		\
 		"run emmcargs; run setbootenv\0"				\
-	"nandboot=echo boot from nand card ...; "	\
-		"run nandargs; run setbootenv\0"		\
 	"ramboot=booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}\0"  \
 	"owlboot=fastboot 0\0"                      
 
@@ -136,10 +134,6 @@
 #define CONFIG_CMD_FAT
 #define CONFIG_FAT_WRITE
 #define CONFIG_CMD_EXT4
-
-/* Do not preserve environment */
-#define CONFIG_ENV_IS_NOWHERE		1
-#define CONFIG_ENV_SIZE			0x1000
 
 /* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE		512	/* Console I/O Buffer Size */
