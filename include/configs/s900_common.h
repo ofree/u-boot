@@ -82,6 +82,7 @@
 			"fi; " \
 		"fi;\0" \
 	"allboot=" \
+		"booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}; " \
 		"setenv bootdisk 0; setenv bootpart 1; setenv dotry 1; run runbootscr;" \
 		"setenv bootdisk 0; setenv bootpart 2; setenv dotry 1; run runbootscr;" \
 		"setenv bootdisk 1; setenv bootpart 1; setenv dotry  ; run runbootscr;" \
